@@ -11,6 +11,12 @@ import MobileView from "../components/MobileView";
 
 const formatNaira = (amount) => `₦${Number(amount).toLocaleString()}`;
 
+const daysLeft = (expiry_date) => {
+  const today = new Date();
+  const expiry = new Date(expiry_date);
+  return Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+};
+
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [members, setMembers] = useState([]);
@@ -89,6 +95,15 @@ const Dashboard = () => {
     );
   }
 
+  // Use the member list as the source of truth for the mobile/desktop sections.
+  // This keeps both views in sync even if the stats response is stale.
+  const expiredMembers = members.filter((member) => member.status === "expired");
+  const expiringMembers = members.filter((member) => {
+    if (member.status !== "active") return false;
+    const days = daysLeft(member.expiry_date);
+    return days >= 0 && days <= 7;
+  });
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       {whatsappModal && <WhatsAppModal links={whatsappModal.links} onClose={() => setWhatsappModal(null)} />}
@@ -103,17 +118,8 @@ const Dashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-10">
 
-        {/* Revenue at risk */}
-        <div className="bg-red-600/10 border border-red-600/30 rounded-2xl p-6 mb-6">
-          <p className="text-red-400 text-sm font-medium mb-1">⚠️ Revenue at risk this week</p>
-          <p className="text-4xl md:text-5xl font-black text-white">{formatNaira(stats?.revenueAtRisk || 0)}</p>
-          <p className="text-gray-400 text-sm mt-2">
-            {stats?.expiringThisWeek?.length || 0} member{stats?.expiringThisWeek?.length !== 1 ? "s" : ""} expiring in the next 7 days
-          </p>
-        </div>
-
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <p className="text-gray-400 text-xs mb-1">Active Members</p>
             <p className="text-3xl font-black text-green-400">{stats?.totalActive || 0}</p>
@@ -122,22 +128,23 @@ const Dashboard = () => {
             <p className="text-gray-400 text-xs mb-1">Lost (Last 30 Days)</p>
             <p className="text-3xl font-black text-red-400">{formatNaira(stats?.revenueLost || 0)}</p>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 col-span-2 md:col-span-1">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <p className="text-gray-400 text-xs mb-1">Recovery Rate</p>
             <p className="text-3xl font-black text-yellow-400">{stats?.recoveryRate || 0}%</p>
           </div>
         </div>
 
         <ExpiringSection
-          members={stats?.expiringThisWeek}
+          members={expiringMembers}
           sendingReminder={sendingReminder}
           remindingAll={remindingAll}
           onSendReminder={handleSendReminder}
           onRemindAll={handleRemindAll}
+          onReactivate={setReactivateModal}
         />
 
         <ExpiredSection
-          members={stats?.expiredMembers}
+          members={expiredMembers}
           onReactivate={setReactivateModal}
           onDelete={setDeleteModal}
         />
@@ -149,12 +156,13 @@ const Dashboard = () => {
         />
 
         <MobileView
-          expiringMembers={stats?.expiringThisWeek}
-          allMembers={members}
+          expiringMembers={expiringMembers}
+          expiredMembers={expiredMembers}
           sendingReminder={sendingReminder}
           remindingAll={remindingAll}
           onSendReminder={handleSendReminder}
           onRemindAll={handleRemindAll}
+          onReactivate={setReactivateModal}
         />
 
       </div>

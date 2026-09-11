@@ -7,7 +7,7 @@ const ExpiredSection = ({ members, onReactivate, onDelete }) => {
     <div className="hidden md:block bg-gray-900 border border-gray-800 rounded-2xl mb-8">
       <div className="px-6 py-4 border-b border-gray-800">
         <h2 className="font-bold text-lg">❌ Expired Members</h2>
-        <p className="text-gray-500 text-sm">Reactivate members who have renewed</p>
+        <p className="text-gray-500 text-sm">Renew members before they are lost</p>
       </div>
       <div className="divide-y divide-gray-800">
         {members.map((member) => (

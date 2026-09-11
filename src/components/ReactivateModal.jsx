@@ -46,13 +46,13 @@ const ReactivateModal = ({ member, onSuccess, onClose }) => {
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
       <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm">
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-          <h2 className="font-bold text-white text-lg">♻️ Reactivate Member</h2>
+          <h2 className="font-bold text-white text-lg">♻️ Renew Membership</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">✕</button>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           <p className="text-gray-400 text-sm">
-            Reactivating <span className="text-white font-semibold">{member.name}</span>. Choose how to renew their membership:
+            Renewing <span className="text-white font-semibold">{member.name}</span>. Choose how to renew their membership:
           </p>
 
           {/* Option 1 — same plan */}
@@ -121,7 +121,7 @@ const ReactivateModal = ({ member, onSuccess, onClose }) => {
             disabled={loading || (mode === "change" && !selectedPlan)}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-semibold transition disabled:opacity-50"
           >
-            {loading ? "Reactivating..." : "Confirm"}
+            {loading ? "Renewing..." : "Confirm"}
           </button>
         </div>
       </div>

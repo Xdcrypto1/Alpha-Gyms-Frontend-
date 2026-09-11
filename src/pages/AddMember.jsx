@@ -1,21 +1,32 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 
 const formatNaira = (amount) => `₦${Number(amount).toLocaleString()}`;
 
+const getToday = () => {
+  const date = new Date();
+  const offset = date.getTimezoneOffset();
+  return new Date(date.getTime() - offset * 60 * 1000).toISOString().split("T")[0];
+};
+
+const initialForm = {
+  name: "",
+  email: "",
+  whatsapp: "",
+  sex: "",
+  date_of_birth: "",
+  plan: "",
+  amount: 0,
+  start_date: getToday(),
+  payment_method: "cash",
+  payment_reference: "",
+};
+
 const AddMember = () => {
   const [plans, setPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(true);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    plan: "",
-    amount: 0,
-    payment_method: "cash",
-    payment_reference: "",
-    whatsapp: "",
-  });
+  const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -42,17 +53,21 @@ const AddMember = () => {
   const handlePlanChange = (e) => {
     const selected = plans.find((p) => p.name === e.target.value);
     if (selected) {
-      setForm({ ...form, plan: selected.name, amount: selected.amount });
+      setForm((f) => ({ ...f, plan: selected.name, amount: selected.amount }));
     }
   };
 
   const handleSubmit = async () => {
-    if (!form.name) {
+    if (!form.name.trim()) {
       toast.error("Name is required");
       return;
     }
     if (!form.plan) {
       toast.error("Please select a plan");
+      return;
+    }
+    if (!form.start_date) {
+      toast.error("Please select a membership start date");
       return;
     }
 
@@ -61,16 +76,12 @@ const AddMember = () => {
       await api.post("/members", form);
       toast.success("Member added successfully");
       setForm({
-        name: "",
-        email: "",
+        ...initialForm,
         plan: plans[0]?.name || "",
         amount: plans[0]?.amount || 0,
-        payment_method: "cash",
-        payment_reference: "",
-        whatsapp: "",
       });
     } catch (error) {
-      toast.error("Failed to add member");
+      toast.error(error.response?.data?.error || "Failed to add member");
     } finally {
       setLoading(false);
     }
@@ -81,7 +92,7 @@ const AddMember = () => {
       <div className="max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-2">Add New Member</h1>
         <p className="text-gray-400 text-sm mb-8">
-          Manually add a member who paid cash or used another payment method
+          Add a member and choose when their membership should begin.
         </p>
 
         <div className="bg-gray-900 rounded-2xl p-8 space-y-5 border border-gray-800">
@@ -94,6 +105,32 @@ const AddMember = () => {
               placeholder="John Doe"
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Sex</label>
+              <select
+                value={form.sex}
+                onChange={(e) => setForm({ ...form, sex: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">Select sex</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Birthday</label>
+              <input
+                type="date"
+                value={form.date_of_birth}
+                onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
           </div>
 
           <div>
@@ -148,6 +185,19 @@ const AddMember = () => {
           </div>
 
           <div>
+            <label className="block text-sm text-gray-400 mb-1">Membership Start Date</label>
+            <input
+              type="date"
+              value={form.start_date}
+              onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+            <p className="text-xs text-gray-600 mt-1">
+              The membership duration will start counting from this date.
+            </p>
+          </div>
+
+          <div>
             <label className="block text-sm text-gray-400 mb-1">Payment Method</label>
             <select
               value={form.payment_method}
@@ -188,3 +238,4 @@ const AddMember = () => {
 };
 
 export default AddMember;
+

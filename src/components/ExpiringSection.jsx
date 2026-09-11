@@ -6,7 +6,7 @@ const daysLeft = (expiry_date) => {
   return Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
 };
 
-const ExpiringSection = ({ members, sendingReminder, remindingAll, onSendReminder, onRemindAll }) => {
+const ExpiringSection = ({ members, sendingReminder, remindingAll, onSendReminder, onRemindAll, onReactivate }) => {
   if (!members?.length) return null;
 
   return (
@@ -30,10 +30,18 @@ const ExpiringSection = ({ members, sendingReminder, remindingAll, onSendReminde
                   <span className="text-gray-600 ml-2">{member.plan} · {formatNaira(member.amount)}</span>
                 </p>
               </div>
-              <button onClick={() => onSendReminder(member)} disabled={sendingReminder === member.id}
-                className="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded-xl font-semibold transition disabled:opacity-50 whitespace-nowrap">
-                {sendingReminder === member.id ? "Loading..." : "Send Reminder"}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => onReactivate(member)}
+                  className="text-green-400 hover:text-green-300 text-xs font-semibold transition whitespace-nowrap"
+                >
+                  Renew
+                </button>
+                <button onClick={() => onSendReminder(member)} disabled={sendingReminder === member.id}
+                  className="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded-xl font-semibold transition disabled:opacity-50 whitespace-nowrap">
+                  {sendingReminder === member.id ? "Loading..." : "Send Reminder"}
+                </button>
+              </div>
             </div>
           );
         })}
