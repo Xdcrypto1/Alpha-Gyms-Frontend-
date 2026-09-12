@@ -8,6 +8,7 @@ import ExpiringSection from "../components/ExpiringSection";
 import ExpiredSection from "../components/ExpiredSection";
 import MembersTable from "../components/MembersTable";
 import MobileView from "../components/MobileView";
+import EditMemberModal from "../components/EditMemberModal";
 
 const daysLeft = (expiry_date) => {
   const today = new Date();
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [whatsappModal, setWhatsappModal] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
   const [reactivateModal, setReactivateModal] = useState(null);
+  const [editMember, setEditMember] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -31,6 +33,7 @@ const Dashboard = () => {
         api.get("/members/stats"),
         api.get("/members"),
       ]);
+
       setStats(statsRes.data);
       setMembers(membersRes.data);
     } catch (error) {
@@ -42,10 +45,14 @@ const Dashboard = () => {
 
   const handleSendReminder = async (member) => {
     setSendingReminder(member.id);
+
     try {
       const res = await api.post(`/members/${member.id}/remind`);
+
       if (res.data.whatsappUrl) {
-        setWhatsappModal({ links: [{ name: member.name, url: res.data.whatsappUrl }] });
+        setWhatsappModal({
+          links: [{ name: member.name, url: res.data.whatsappUrl }],
+        });
       } else {
         toast.success(`Email reminder sent to ${member.name}`);
       }
@@ -58,10 +65,14 @@ const Dashboard = () => {
 
   const handleRemindAll = async () => {
     setRemindingAll(true);
+
     try {
       const res = await api.post("/members/remind-all");
+
       if (res.data.whatsappLinks?.length > 0) {
-        setWhatsappModal({ links: res.data.whatsappLinks });
+        setWhatsappModal({
+          links: res.data.whatsappLinks,
+        });
       } else {
         toast.success(res.data.message);
       }
@@ -74,16 +85,23 @@ const Dashboard = () => {
 
   const handleDelete = async (id, delete_code) => {
     try {
-      await api.delete(`/members/${id}`, { data: { delete_code } });
+      await api.delete(`/members/${id}`, {
+        data: { delete_code },
+      });
+
       toast.success("Member removed");
       setDeleteModal(null);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to remove member");
+      toast.error(
+        error.response?.data?.error || "Failed to remove member"
+      );
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   if (loading) {
     return (
@@ -93,24 +111,61 @@ const Dashboard = () => {
     );
   }
 
-  // Use the member list as the source of truth for the mobile/desktop sections.
-  // This keeps both views in sync even if the stats response is stale.
-  const expiredMembers = members.filter((member) => member.status === "expired");
+  // Use the member list as the source of truth
+  // for both mobile and desktop sections.
+  const expiredMembers = members.filter(
+    (member) => member.status === "expired"
+  );
+
   const expiringMembers = members.filter((member) => {
     if (member.status !== "active") return false;
+
     const days = daysLeft(member.expiry_date);
+
     return days >= 0 && days <= 7;
   });
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      {whatsappModal && <WhatsAppModal links={whatsappModal.links} onClose={() => setWhatsappModal(null)} />}
-      {deleteModal && <DeleteModal member={deleteModal} onConfirm={handleDelete} onClose={() => setDeleteModal(null)} />}
+
+      {/* WhatsApp Modal */}
+      {whatsappModal && (
+        <WhatsAppModal
+          links={whatsappModal.links}
+          onClose={() => setWhatsappModal(null)}
+        />
+      )}
+
+      {/* Delete Modal */}
+      {deleteModal && (
+        <DeleteModal
+          member={deleteModal}
+          onConfirm={handleDelete}
+          onClose={() => setDeleteModal(null)}
+        />
+      )}
+
+      {/* Renew Modal */}
       {reactivateModal && (
         <ReactivateModal
           member={reactivateModal}
-          onSuccess={() => { setReactivateModal(null); fetchData(); }}
+          onSuccess={() => {
+            setReactivateModal(null);
+            fetchData();
+          }}
           onClose={() => setReactivateModal(null)}
+        />
+      )}
+
+      {/* Edit Member Modal */}
+      {editMember && (
+        <EditMemberModal
+          member={editMember}
+          onSuccess={() => {
+            setEditMember(null);
+            fetchData();
+          }}
+          onClose={() => setEditMember(null)}
         />
       )}
 
@@ -118,16 +173,32 @@ const Dashboard = () => {
 
         {/* Stats row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+          {/* Active Members */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <p className="text-gray-400 text-xs mb-1">Active Members</p>
-            <p className="text-3xl font-black text-green-400">{stats?.totalActive || 0}</p>
+            <p className="text-gray-400 text-xs mb-1">
+              Active Members
+            </p>
+
+            <p className="text-3xl font-black text-green-400">
+              {stats?.totalActive || 0}
+            </p>
           </div>
+
+          {/* Recovery Rate */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <p className="text-gray-400 text-xs mb-1">Recovery Rate</p>
-            <p className="text-3xl font-black text-yellow-400">{stats?.recoveryRate || 0}%</p>
+            <p className="text-gray-400 text-xs mb-1">
+              Recovery Rate
+            </p>
+
+            <p className="text-3xl font-black text-yellow-400">
+              {stats?.recoveryRate || 0}%
+            </p>
           </div>
+
         </div>
 
+        {/* Expiring Members */}
         <ExpiringSection
           members={expiringMembers}
           sendingReminder={sendingReminder}
@@ -137,18 +208,23 @@ const Dashboard = () => {
           onReactivate={setReactivateModal}
         />
 
+        {/* Expired Members */}
         <ExpiredSection
           members={expiredMembers}
           onReactivate={setReactivateModal}
           onDelete={setDeleteModal}
+          onEdit={setEditMember}
         />
 
+        {/* All Members */}
         <MembersTable
           members={members}
           onReactivate={setReactivateModal}
           onDelete={setDeleteModal}
+          onEdit={setEditMember}
         />
 
+        {/* Mobile Quick View */}
         <MobileView
           expiringMembers={expiringMembers}
           expiredMembers={expiredMembers}
