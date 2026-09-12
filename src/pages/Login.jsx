@@ -36,7 +36,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-red-500 font-black text-3xl">⚡</span>
-          <h1 className="text-white text-2xl font-bold mt-2">GymSubs</h1>
+          <h1 className="text-white text-2xl font-bold mt-2">AlphaGyms</h1>
           <p className="text-gray-400 text-sm mt-1">Sign in to your dashboard</p>
         </div>
 

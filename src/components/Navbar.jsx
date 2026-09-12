@@ -25,7 +25,7 @@ const Navbar = () => {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <span className="text-red-500 font-black text-xl">⚡</span>
-          <span className="font-bold text-lg">GymSubs</span>
+          <span className="font-bold text-lg">AlphaGym</span>
           {gym && (
             <span className="text-gray-500 text-sm ml-2 hidden md:inline">
               — {gym.gym_name}

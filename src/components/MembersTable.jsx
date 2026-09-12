@@ -13,23 +13,25 @@ const statusColor = (status) => {
 };
 
 const MembersTable = ({ members, onReactivate, onDelete }) => {
-  // Expired members have their own section above. Keep them out of the general list.
-  const visibleMembers = members.filter((member) => member.status !== "expired");
+  // On mobile, show every member in the table so the receptionist can manage the full list.
+  // On desktop, expired members stay in their dedicated section above.
+  const visibleMembers = members;
 
   return (
-    <div className="hidden md:block bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
         <h2 className="font-bold text-lg">All Members</h2>
-        <span className="text-gray-500 text-sm">{visibleMembers.length} active</span>
+        <span className="text-gray-500 text-sm">{visibleMembers.length} members</span>
       </div>
       {visibleMembers.length === 0 ? (
         <div className="p-10 text-center text-gray-500">No active members yet. Add your first one.</div>
       ) : (
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-[1050px] w-full text-sm">
           <thead>
             <tr className="text-gray-500 text-left border-b border-gray-800">
               <th className="px-6 py-3">Name</th>
-              <th className="px-6 py-3">Email</th>
+              <th className="px-6 py-3">WhatsApp No.</th>
               <th className="px-6 py-3">Sex</th>
               <th className="px-6 py-3">Birthday</th>
               <th className="px-6 py-3">Plan</th>
@@ -44,9 +46,14 @@ const MembersTable = ({ members, onReactivate, onDelete }) => {
             {visibleMembers.map((member) => {
               const days = daysLeft(member.expiry_date);
               return (
-                <tr key={member.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition">
+                <tr
+                  key={member.id}
+                  className={`border-b border-gray-800 hover:bg-gray-800/50 transition ${
+                    member.status === "expired" ? "md:hidden" : ""
+                  }`}
+                >
                   <td className="px-6 py-4 font-medium">{member.name}</td>
-                  <td className="px-6 py-4 text-gray-400">{member.email || "—"}</td>
+                  <td className="px-6 py-4 text-gray-400">{member.whatsapp || "—"}</td>
                   <td className="px-6 py-4 capitalize text-gray-400">{member.sex || "—"}</td>
                   <td className="px-6 py-4 text-gray-400">
                     {member.date_of_birth ? new Date(member.date_of_birth).toLocaleDateString() : "—"}
@@ -80,7 +87,8 @@ const MembersTable = ({ members, onReactivate, onDelete }) => {
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
     </div>
   );

@@ -19,7 +19,7 @@ const initialForm = {
   plan: "",
   amount: 0,
   start_date: getToday(),
-  payment_method: "cash",
+  payment_method: "transfer",
   payment_reference: "",
 };
 
@@ -199,16 +199,10 @@ const AddMember = () => {
 
           <div>
             <label className="block text-sm text-gray-400 mb-1">Payment Method</label>
-            <select
-              value={form.payment_method}
-              onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              <option value="cash">Cash</option>
-              <option value="transfer">Bank Transfer</option>
-              <option value="paystack">Paystack</option>
-              <option value="renewal">Renewal</option>
-            </select>
+            <div className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200">
+              Bank Transfer
+            </div>
+            <p className="text-xs text-gray-600 mt-1">All membership payments are recorded as bank transfer.</p>
           </div>
 
           <div>
@@ -238,4 +232,5 @@ const AddMember = () => {
 };
 
 export default AddMember;
+
 

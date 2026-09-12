@@ -9,8 +9,6 @@ import ExpiredSection from "../components/ExpiredSection";
 import MembersTable from "../components/MembersTable";
 import MobileView from "../components/MobileView";
 
-const formatNaira = (amount) => `₦${Number(amount).toLocaleString()}`;
-
 const daysLeft = (expiry_date) => {
   const today = new Date();
   const expiry = new Date(expiry_date);
@@ -119,14 +117,10 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-10">
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <p className="text-gray-400 text-xs mb-1">Active Members</p>
             <p className="text-3xl font-black text-green-400">{stats?.totalActive || 0}</p>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <p className="text-gray-400 text-xs mb-1">Lost (Last 30 Days)</p>
-            <p className="text-3xl font-black text-red-400">{formatNaira(stats?.revenueLost || 0)}</p>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <p className="text-gray-400 text-xs mb-1">Recovery Rate</p>

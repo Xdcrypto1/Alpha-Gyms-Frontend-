@@ -129,15 +129,7 @@ const MobileView = ({
         </div>
       )}
 
-      <div className="mt-4 px-4 py-4 bg-gray-900/60 border border-gray-800 rounded-2xl text-center">
-        <p className="text-gray-400 text-sm">
-          Need the full member list?
-        </p>
-        <p className="text-gray-600 text-xs mt-1">
-          Please use the desktop version to view and manage all members.
-        </p>
-      </div>
-    </div>
+   </div>
   );
 };
 
