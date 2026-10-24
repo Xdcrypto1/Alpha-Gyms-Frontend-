@@ -16,6 +16,8 @@ const MobileView = ({
   onSendReminder,
   onRemindAll,
   onReactivate,
+  onDelete,
+  onEdit,
 }) => {
   const [tab, setTab] = useState("expiring");
 
@@ -116,12 +118,26 @@ const MobileView = ({
                       Expired {new Date(member.expiry_date).toLocaleDateString()}
                     </p>
                   </div>
-                  <button
-                    onClick={() => onReactivate(member)}
-                    className="text-green-400 hover:text-green-300 text-xs px-2 py-2 rounded-xl font-semibold transition whitespace-nowrap"
-                  >
-                    Renew
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onEdit?.(member)}
+                      className="text-blue-400 hover:text-blue-300 text-xs px-2 py-2 rounded-xl font-semibold transition whitespace-nowrap"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => onReactivate(member)}
+                      className="text-green-400 hover:text-green-300 text-xs px-2 py-2 rounded-xl font-semibold transition whitespace-nowrap"
+                    >
+                      Renew
+                    </button>
+                    <button
+                      onClick={() => onDelete?.(member)}
+                      className="text-red-400 hover:text-red-300 text-xs px-2 py-2 rounded-xl font-semibold transition whitespace-nowrap"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -134,4 +150,6 @@ const MobileView = ({
 };
 
 export default MobileView;
+
+
 

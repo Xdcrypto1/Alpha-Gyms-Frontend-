@@ -198,31 +198,34 @@ const Dashboard = () => {
 
         </div>
 
-        {/* Expiring Members */}
-        <ExpiringSection
-          members={expiringMembers}
-          sendingReminder={sendingReminder}
-          remindingAll={remindingAll}
-          onSendReminder={handleSendReminder}
-          onRemindAll={handleRemindAll}
-          onReactivate={setReactivateModal}
-        />
+        {/* Main section: full member directory, collapsible on desktop and mobile */}
+        <section aria-label="All gym members" className="mb-6 md:mb-8">
+          <MembersTable
+            members={members}
+            onReactivate={setReactivateModal}
+            onDelete={setDeleteModal}
+            onEdit={setEditMember}
+          />
+        </section>
 
-        {/* Expired Members */}
-        <ExpiredSection
-          members={expiredMembers}
-          onReactivate={setReactivateModal}
-          onDelete={setDeleteModal}
-          onEdit={setEditMember}
-        />
+        {/* Secondary sections sit below the directory and align side by side on desktop */}
+        <section aria-label="Membership follow-up" className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-stretch">
+          <ExpiringSection
+            members={expiringMembers}
+            sendingReminder={sendingReminder}
+            remindingAll={remindingAll}
+            onSendReminder={handleSendReminder}
+            onRemindAll={handleRemindAll}
+            onReactivate={setReactivateModal}
+          />
 
-        {/* All Members */}
-        <MembersTable
-          members={members}
-          onReactivate={setReactivateModal}
-          onDelete={setDeleteModal}
-          onEdit={setEditMember}
-        />
+          <ExpiredSection
+            members={expiredMembers}
+            onReactivate={setReactivateModal}
+            onDelete={setDeleteModal}
+            onEdit={setEditMember}
+          />
+        </section>
 
         {/* Mobile Quick View */}
         <MobileView
@@ -233,6 +236,8 @@ const Dashboard = () => {
           onSendReminder={handleSendReminder}
           onRemindAll={handleRemindAll}
           onReactivate={setReactivateModal}
+          onDelete={setDeleteModal}
+          onEdit={setEditMember}
         />
 
       </div>

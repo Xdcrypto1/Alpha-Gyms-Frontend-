@@ -14,6 +14,7 @@ const statusColor = (status) => {
 
 const MembersTable = ({ members, onReactivate, onDelete, onEdit }) => {
   const [search, setSearch] = useState("");
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const filteredMembers = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -28,24 +29,39 @@ const MembersTable = ({ members, onReactivate, onDelete, onEdit }) => {
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-      <div className="px-4 md:px-6 py-4 border-b border-gray-800 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-lg">All Members</h2>
-          <span className="text-gray-500 text-sm">{filteredMembers.length} members</span>
+      <div className="px-4 md:px-6 py-4 border-b border-gray-800 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-bold text-lg">Full Members List</h2>
+            <span className="text-gray-500 text-sm">{filteredMembers.length} of {members.length} members</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsExpanded((expanded) => !expanded)}
+            aria-expanded={isExpanded}
+            aria-controls="all-members-table-content"
+            className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700 transition"
+          >
+            {isExpanded ? "Collapse list" : "Expand list"}
+            <span aria-hidden="true" className="text-gray-400">{isExpanded ? "⌃" : "⌄"}</span>
+          </button>
         </div>
 
-        <div className="relative w-full md:w-80">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">⌕</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search member name..."
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-        </div>
+        {isExpanded && (
+          <div className="relative w-full md:max-w-sm">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">⌕</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search member name..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+          </div>
+        )}
       </div>
 
+      {isExpanded && <div id="all-members-table-content" className="border-t border-gray-800">
       {filteredMembers.length === 0 ? (
         <div className="p-10 text-center text-gray-500">
           {search ? `No members found for “${search}”.` : "No active members yet. Add your first one."}
@@ -73,7 +89,7 @@ const MembersTable = ({ members, onReactivate, onDelete, onEdit }) => {
                 return (
                   <tr
                     key={member.id}
-                    className={`border-b border-gray-800 hover:bg-gray-800/50 transition ${member.status === "expired" ? "md:hidden" : ""}`}
+                    className="border-b border-gray-800 hover:bg-gray-800/50 transition"
                   >
                     <td className="px-6 py-4 font-medium">{member.name}</td>
                     <td className="px-6 py-4 text-gray-400">{member.whatsapp || "—"}</td>
@@ -116,6 +132,7 @@ const MembersTable = ({ members, onReactivate, onDelete, onEdit }) => {
           </table>
         </div>
       )}
+      </div>}
     </div>
   );
 };

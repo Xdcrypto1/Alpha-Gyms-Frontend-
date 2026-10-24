@@ -43,14 +43,14 @@ const ReactivateModal = ({ member, onSuccess, onClose }) => {
   const formatNaira = (amount) => `₦${Number(amount).toLocaleString()}`;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm">
+    <div className="fixed inset-0 bg-black/70 flex items-start sm:items-center justify-center z-50 px-3 py-3 sm:p-4 overflow-y-auto overscroll-contain">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] flex flex-col my-auto">
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
           <h2 className="font-bold text-white text-lg">♻️ Renew Membership</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">✕</button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4 overflow-y-auto overscroll-contain">
           <p className="text-gray-400 text-sm">
             Renewing <span className="text-white font-semibold">{member.name}</span>. Choose how to renew their membership:
           </p>
@@ -112,7 +112,7 @@ const ReactivateModal = ({ member, onSuccess, onClose }) => {
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-800 flex gap-3">
+        <div className="px-4 sm:px-6 py-4 border-t border-gray-800 flex gap-3 shrink-0 bg-gray-900">
           <button onClick={onClose} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl text-sm font-semibold transition">
             Cancel
           </button>
@@ -130,3 +130,4 @@ const ReactivateModal = ({ member, onSuccess, onClose }) => {
 };
 
 export default ReactivateModal;
+
