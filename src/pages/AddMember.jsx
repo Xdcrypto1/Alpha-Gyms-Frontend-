@@ -4,6 +4,27 @@ import toast from "react-hot-toast";
 
 const formatNaira = (amount) => `₦${Number(amount).toLocaleString()}`;
 
+const isMonthlyPlan = (plan) => {
+  if (!plan) return false;
+  return String(plan.name || plan).trim().toLowerCase().includes("month") ||
+    Number(plan.duration_days) === 30;
+};
+
+const getMonthlyDuration = (dateString) => {
+  if (!dateString) return 0;
+  const [year, month] = dateString.split("-").map(Number);
+  return new Date(year, month, 0).getDate() - 1;
+};
+
+const getExpiryPreview = (startDate, duration) => {
+  if (!startDate || !Number.isInteger(Number(duration)) || Number(duration) < 1) return "";
+  const [year, month, day] = startDate.split("-").map(Number);
+  const expiry = new Date(year, month - 1, day + Number(duration) - 1);
+  return expiry.toLocaleDateString("en-GB", {
+    day: "2-digit", month: "long", year: "numeric",
+  });
+};
+
 const getToday = () => {
   const date = new Date();
   const offset = date.getTimezoneOffset();
@@ -19,6 +40,7 @@ const initialForm = {
   plan: "",
   amount: 0,
   start_date: getToday(),
+  duration_days: 0,
   payment_method: "transfer",
   payment_reference: "",
 };
@@ -39,9 +61,12 @@ const AddMember = () => {
             ...f,
             plan: res.data[0].name,
             amount: res.data[0].amount,
+            duration_days: isMonthlyPlan(res.data[0])
+              ? getMonthlyDuration(f.start_date)
+              : Number(res.data[0].duration_days) || 0,
           }));
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load plans");
       } finally {
         setPlansLoading(false);
@@ -53,7 +78,14 @@ const AddMember = () => {
   const handlePlanChange = (e) => {
     const selected = plans.find((p) => p.name === e.target.value);
     if (selected) {
-      setForm((f) => ({ ...f, plan: selected.name, amount: selected.amount }));
+      setForm((f) => ({
+        ...f,
+        plan: selected.name,
+        amount: selected.amount,
+        duration_days: isMonthlyPlan(selected)
+          ? getMonthlyDuration(f.start_date)
+          : Number(selected.duration_days) || 0,
+      }));
     }
   };
 
@@ -70,15 +102,26 @@ const AddMember = () => {
       toast.error("Please select a membership start date");
       return;
     }
+    const selectedPlan = plans.find((p) => p.name === form.plan);
+    if (isMonthlyPlan(selectedPlan) && (!Number.isInteger(Number(form.duration_days)) || Number(form.duration_days) < 1 || Number(form.duration_days) > 366)) {
+      toast.error("Enter a valid membership duration");
+      return;
+    }
 
     setLoading(true);
     try {
-      await api.post("/members", form);
+      await api.post("/members", {
+        ...form,
+        duration_days: isMonthlyPlan(selectedPlan) ? Number(form.duration_days) : undefined,
+      });
       toast.success("Member added successfully");
       setForm({
         ...initialForm,
         plan: plans[0]?.name || "",
         amount: plans[0]?.amount || 0,
+        duration_days: isMonthlyPlan(plans[0])
+          ? getMonthlyDuration(initialForm.start_date)
+          : Number(plans[0]?.duration_days) || 0,
       });
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to add member");
@@ -189,13 +232,49 @@ const AddMember = () => {
             <input
               type="date"
               value={form.start_date}
-              onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+              onChange={(e) => setForm((f) => {
+                const selectedPlan = plans.find((p) => p.name === f.plan);
+                return {
+                  ...f,
+                  start_date: e.target.value,
+                  duration_days: isMonthlyPlan(selectedPlan)
+                    ? getMonthlyDuration(e.target.value)
+                    : f.duration_days,
+                };
+              })}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             />
             <p className="text-xs text-gray-600 mt-1">
               The membership duration will start counting from this date.
             </p>
           </div>
+
+          {isMonthlyPlan(plans.find((p) => p.name === form.plan)) && (
+            <div className="rounded-xl border border-gray-700 bg-gray-800/70 p-4 space-y-2">
+              <label className="block text-sm text-gray-300 font-medium" htmlFor="membership-duration">
+                Membership Duration (days)
+              </label>
+              <input
+                id="membership-duration"
+                type="number"
+                min="1"
+                max="366"
+                step="1"
+                value={form.duration_days}
+                onChange={(e) => setForm((f) => ({ ...f, duration_days: e.target.value }))}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+              <p className="text-xs text-gray-500">
+                Automatically based on the start month. You can adjust it if needed.
+              </p>
+              <div className="rounded-lg bg-gray-900 border border-gray-700 px-3 py-3">
+                <p className="text-xs text-gray-400">Calculated Expiry Date</p>
+                <p className="text-base font-semibold text-green-400 mt-1">
+                  {getExpiryPreview(form.start_date, form.duration_days) || "Enter a valid duration"}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm text-gray-400 mb-1">Payment Method</label>
