@@ -9,6 +9,7 @@ import ExpiredSection from "../components/ExpiredSection";
 import MembersTable from "../components/MembersTable";
 import MobileView from "../components/MobileView";
 import EditMemberModal from "../components/EditMemberModal";
+import MemberDetailsModal from "../components/MemberDetailsModal";
 
 const daysLeft = (expiry_date) => {
   const today = new Date();
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [deleteModal, setDeleteModal] = useState(null);
   const [reactivateModal, setReactivateModal] = useState(null);
   const [editMember, setEditMember] = useState(null);
+  const [viewMember, setViewMember] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -157,6 +159,18 @@ const Dashboard = () => {
         />
       )}
 
+      {/* Member Details Modal */}
+      {viewMember && (
+        <MemberDetailsModal
+          member={viewMember}
+          onClose={() => setViewMember(null)}
+          onEdit={(member) => {
+            setViewMember(null);
+            setEditMember(member);
+          }}
+        />
+      )}
+
       {/* Edit Member Modal */}
       {editMember && (
         <EditMemberModal
@@ -202,6 +216,7 @@ const Dashboard = () => {
         <section aria-label="All gym members" className="mb-6 md:mb-8">
           <MembersTable
             members={members}
+            onView={setViewMember}
             onReactivate={setReactivateModal}
             onDelete={setDeleteModal}
             onEdit={setEditMember}
